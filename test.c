@@ -1,182 +1,80 @@
-// 1
-// 666
-#include<stdio.h>
-#include<stdlib.h>
-#include<time.h>
-
-// int main()
-// {
-// //     int x=0;
-// //     scanf("%d",&x);
-// //     printf("%x",x);
-// //     return 0;
-// // printf("%d\n",5==3);
-// // printf("%d\n",5>3);
-// // printf("%d\n",5<=3);
-// printf("%d\n",7>=3+4);
-// printf("%d\n",6>5>2);
-// return 0;
-// }
-
-// int main()
-// {
-//     const int MINOR = 35;
-//     int age = 0;
-
-//     printf("请输入你的年龄：");
-//     scanf("%d",&age);
-
-//     printf("你的年龄是%d岁。\n",age);
-
-//     if( age < MINOR)
-//     {
-//         printf("年轻是美好的！");
-//     }
-// printf("年龄决定了你的精神世界好好珍惜吧。\n");
-// return 0;
-
-// }
-//int main()
-//{
-    // int a=0;
-    // int b=0;
-    // printf("请输入两个整数：");
-    // scanf("%d %d",&a,&b);
-
-    // int max = 0;
-    // if( a > b )
-    // {
-    //     max = a;
-    // }
-    // if( b > a )
-    // {
-    //     max = b;
-    // }
-    // printf("大的那个是%d\n",max);
-//     const double RATE = 8.25;
-//     const int STANDARD = 40;
-//     double pay = 0.0;
-//     int hours;
-    
-//     printf("请输入工作的小时数：");
-//     scanf("%d",&hours);
-//     printf("\n");
-//     if(hours>STANDARD)
-//     {
-//         pay=STANDARD*RATE+(hours-STANDARD)*(RATE*1.5);
-//     }
-//     else
-//     {
-//         pay=hours*RATE;
-//     }
-//    printf("应付工资：%f\n",pay); 
+#include "game.h"
+#include <stdio.h>
 
 
-//     return 0;
-// }
-int main()
+
+void menu()
 {
-    // int a,b,c;
-    // scanf("%d %d %d",&a,&b,&c);
-
-    // int max = 0;
-
-    // if(a>b)
-    // {
-    //     if(a>c)
-    //     {
-    //         max = a;
-    //     }
-    //     else{
-    //         max = c;
-    //     }
-    // }
-    // else
-    // {
-    //     if(b>c)
-    //     {
-    //         max=b;
-    //     }
-    //     else
-    //     {
-    //         max=c;
-    //     }
-    // printf("The max is %d",max);
-    //  int score = 0;
-    //     scanf("%d",&score);
-    //     score /=10; 
-    //  if(score>=90)
-    //  {
-    //     score=1;
-    //  }
-    //  else if(80<=score<90)
-    //  {
-    //     score=2;
-    //  }
-    //  else if(70<=score<80)
-    //  {
-    //     score=3;
-    //  }
-    //  else if(60<=score<70)
-    //  {
-    //     score=4;
-    //  }
-    //  else
-    //  {
-    //     score=5;
-    //  }
-    //  switch(score)
-    //  {
-    //     case 10:
-    //     case 9:
-    //     printf("A");
-    //     break;
-    //     case 8:
-    //     printf("B");
-    //     break;
-    //     case 7:
-    //     printf("C");
-    //     break;
-    //     case 6:
-    //     printf("D");
-    //     break;
-    //     default:
-    //     printf("E");
-    //     break;
-
-    //  }
-// int x;
-// int n=0;
-// scanf("%d",&x);
-// n++;
-// x/=10;
-// while(x>0)
-// {
-//     n++;
-//     x /= 10;
-// }
-// printf("%d\n",n);
-srand(time(0));
-int number=rand()%10;
-int conut=0;
-int a=0;
-do
+    printf("***********************\n");
+    printf("*****    三子棋    *****\n");
+    printf("**** 1.play 0.exit ****\n");
+    printf("***********************\n");
+}
+void game()
 {
-    printf("请猜一点1~100的数");
-    scanf("%d",&a);
-    if(a>number)
+    // 第二部分实现
+    char ret = 0; 
+    char board[ROW][COL] = {0};
+    // 初始化棋盘的函数
+    InitBoard(board, ROW, COL);
+    DisplayBoard(board, ROW, COL);
+    // 下棋
+    while(1)
     {
-        printf("bigger!\n");
-
+        PlayerMove(board, ROW, COL);
+        //判断输赢
+        ret = IsWin(board,ROW,COL);
+        if(ret != 'c')
+        {
+            break;
+        }
+        DisplayBoard(board, ROW, COL);
+        ComputerMove(board, ROW, COL);
+        //判断输赢
+        ret = IsWin(board,ROW,COL);
+        if(ret != 'c')
+        {
+            break;
+        }
+        DisplayBoard(board, ROW, COL);
     }
-    else if(a<number)
+    if(ret == '*')
     {
-        printf("smaller!\n");
-
+        printf("玩家赢\n");
     }
-} while(a!=number);
-    printf("%d\n",a);
-
-    return 0;   
+    else if(ret == '#')
+    {
+        printf("电脑赢\n");
+    }
+    else
+    {
+        printf("平局\n");
+    }
+    DisplayBoard(board,ROW,COL);
 }
 
+int main()
+{
+    srand((unsigned int)time(NULL));//设置随机数的生成七点的
+    int input = 0;
+    do
+    {
+        // 打印菜单
+        menu();
+        printf("请输入:>");
+        scanf("%d", &input);
+        switch (input) // 用switch语句来打印给玩家提示，或者正式进入游戏
+        {
+        case 1:
+            game();
+            break;
+        case 0:
+            printf("退出游戏");
+            break;
+        default:
+            printf("输入错误");
+            break;
+        }
+    } while (input);
+    return 0;
+}
