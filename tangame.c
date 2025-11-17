@@ -4,7 +4,8 @@
 #include<stdio.h>
 #include<conio.h>   //它是一个头文件控制键盘的
 
-
+#define WIN_WIDTH 640
+#define WIN_HEIGHT 480
 #define MAX_SNAKE 500 //常量
 
 
@@ -34,7 +35,19 @@ enum DIR
     LEFT,
     RIGHT
 };
-//1.定义  2.初始化一下数据  3.画蛇蛇
+
+//写程序 所有的程序
+
+//1.定义
+struct Food
+{
+    int x;
+    int y;
+    DWORD color;
+    bool flag; //是否被吃掉  是true  不是false
+}food;
+
+//2.初始化一下数据
 void GameInit()
 {
     //蛇的身体的颜色随便变化
@@ -44,27 +57,34 @@ void GameInit()
     snake.score = 0;
     snake.size = 10;
     snake.speed = 10;
-    snake.coor[2].x = 20;
-    snake.coor[2].y = 0;
+    snake.coor[0].x = 20;
+    snake.coor[0].y = 0;
     //初始化数组当中的颜色  每一次有不同的颜色  随机的函数 rand()
-    snake.coor[2].color = RGB(rand() % 256, rand() % 256, rand() % 256);//随机生成颜色
+    snake.coor[0].color = RGB(rand() % 256, rand() % 256, rand() % 256);//随机生成颜色
+
     snake.coor[1].x = 10;
     snake.coor[1].y = 0;
     //初始化数组当中的颜色  每一次有不同的颜色  随机的函数 rand()
     snake.coor[1].color = RGB(rand() % 256, rand() % 256, rand() % 256);//随机生成颜色
-    snake.coor[0].x = 0;
-    snake.coor[0].y = 0;
+
+    snake.coor[2].x = 0;
+    snake.coor[2].y = 0;
     //初始化数组当中的颜色  每一次有不同的颜色  随机的函数 rand()
-    snake.coor[0].color = RGB(rand() % 256, rand() % 256, rand() % 256);//随机生成颜色
+    snake.coor[2].color = RGB(rand() % 256, rand() % 256, rand() % 256);//随机生成颜色
+    
+    //初始化食物
+    food.x = rand() % (WIN_WIDTH / 10) * 10; // 1*10 20 30
+    food.y = rand() % (WIN_HEIGHT / 10) * 10;
+    food.color = RGB(rand() % 256, rand() % 256, rand() % 256);
+    food.flag = true;
 }
 
-//画蛇
+//画蛇 画食物
 void GameDraw()
 {
+    cleardevice();
     //颜色
     setfillcolor(snake.coor[0].color);
-    cleardevice();
-
     for (int i = 0; i < snake.num; i++)
     {
         //填充一下颜色
@@ -72,14 +92,50 @@ void GameDraw()
         //画矩形
         fillrectangle(snake.coor[i].x, snake.coor[i].y, snake.coor[i].x + 10, snake.coor[i].y + 10);
     }
+    //绘制食物
+    //solidcircle(food.x, food.y, 5);
+    if (food.flag)
+    {
+        setfillcolor(food.color);
+        solidellipse(food.x, food.y, food.x + 10, food.y + 10);
+    }
+    
+    //绘制分数
+    char temp[20] = "";
+    sprintf(temp, "分数：%d", snake.score);
+    //有错误
+    outtextxy(10, 10, temp);
 }
 
 //让蛇动起来
 void GameMove()
 {
+    //蛇怎么动   肯定是   x  y这两个轴变化吧
+    for (int i = snake.num -1; i > 0; i--)
+    {
+        snake.coor[i].x = snake.coor[i - 1].x;
+        snake.coor[i].y = snake.coor[i - 1].y;
+    }
+    //都赋值了 x加上速度对吧
+    //snake.coor[0].x++;
+    //snake.coor[0].x += snake.speed;
 
-
-
+    switch (snake.dir)
+    {
+        //蛇动起来    速度有很大关系
+    case UP:
+        snake.coor[0].y -= snake.speed;
+        break;
+    case DOWN:
+        snake.coor[0].y += snake.speed;
+        break;
+    case LEFT:
+        snake.coor[0].x -= snake.speed;
+        break;
+    case RIGHT:
+        snake.coor[0].x += snake.speed;
+        break;
+    }
 }
 //蛇的控制
 void GameController()
@@ -90,20 +146,62 @@ void GameController()
     switch (key)
     {
     case 72:
-        snake.dir = UP;
+        if (snake.dir != DOWN)
+        {
+            snake.dir = UP;
+        }
         break;
     case 80:
-        snake.dir = DOWN;
+        if (snake.dir != UP)
+        {
+            snake.dir = DOWN;
+        }
         break;
     case 75:
-        snake.dir = LEFT;
+        if (snake.dir != RIGHT)
+        {
+            snake.dir = LEFT;
+        }
         break;
     case 77:
-        snake.dir = RIGHT;
+        if (snake.dir != LEFT)
+        {
+            snake.dir = RIGHT;
+        }
         break;
            
     }
     printf("%d\n", key);
+}
+
+
+void createFood()
+//没有食物我再创建一个新的食物
+{
+    if (!food.flag)
+    {
+        food.x = rand() % (WIN_WIDTH / 10) * 10;
+        food.y = rand() % (WIN_HEIGHT / 10) * 10;
+        food.color = RGB(rand() % 256, rand() % 256, rand() % 256);
+        food.flag = true;
+    }
+}
+
+
+
+void EatFoot()
+{
+    if (food.flag && snake.coor[0].x == food.x && snake.coor[0].y == food.y)
+    {
+        //吃到了
+        food.flag = false;
+        snake.num++;
+        snake.score += 10;
+        snake.coor[snake.num - 1].color = RGB(rand() % 256, rand() % 256, rand() % 256);
+        //吃完了 再创建一个新食物
+
+        createFood();
+    }
 }
 
 
@@ -113,28 +211,30 @@ void GameController()
 int main()
 {
     //游戏窗口
-    initgraph(640, 480);
+    initgraph(640, 480,1);
     //RGB代表颜色 二进制的代表 三种颜色的混合体
     setbkcolor(RGB(207, 214, 229));
     cleardevice();
     //设置初始化蛇的数据
     GameInit();
-    
-
-    //画矩形 蛇就是矩形
-    fillrectangle(snake.coor[0].x, snake.coor[0].y,10,10);
-    //circle(20, 20, 20);
-
-
-    //一闪
 
     while (1)
     {
         GameDraw();
+        GameMove();
+        //双缓存机制  主要解决闪屏的问题
+        BeginBatchDraw();
+
         if (_kbhit())  //如果按键了
         {
             GameController();
+            
         }
+        //刷新屏幕
+        FlushBatchDraw();
+        //吃掉食物
+        EatFoot();
+        Sleep(100);
     }
     return 0;
 }
